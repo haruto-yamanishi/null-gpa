@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff } from "lucide-react";
 import { SUBJECTS } from "@/lib/fixtures";
+import { subjectDeviationDisplay } from "@/lib/subject-statistics";
 import type { SubjectStatistic, Visibility } from "@/lib/types";
 import { Toggle } from "./Toggle";
 
@@ -30,6 +31,7 @@ export function GradeTable({
         {SUBJECTS.map((subject) => {
           const score = scores[subject.id];
           const stat = analytics[subject.id];
+          const deviation = subjectDeviationDisplay(stat);
           const visibility = visibilities[subject.id] ?? "public";
 
           return (
@@ -42,7 +44,7 @@ export function GradeTable({
                 {stat ? (
                   <p className="mt-1 text-xs font-medium text-black/40">
                     {stat.rank ? `#${stat.rank} / ${stat.participantCount}` : "順位 —"}
-                    {stat.deviation == null ? " · 偏差値は10人以上で表示" : ` · 偏差値 ${stat.deviation.toFixed(1)}`}
+                    {` · 偏差値 ${deviation.value}（${deviation.note}）`}
                   </p>
                 ) : (
                   <p className="mt-1 text-xs font-medium text-black/30">保存後に順位・偏差値を表示</p>

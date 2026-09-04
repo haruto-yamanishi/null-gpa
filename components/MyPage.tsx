@@ -6,6 +6,7 @@ import { Crown, Eye, EyeOff, Medal, Sparkles } from "lucide-react";
 import { SUBJECTS } from "@/lib/fixtures";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { fetchMyGpaRank, fetchSubjectStatistics } from "@/lib/supabase/submission";
+import { subjectDeviationDisplay } from "@/lib/subject-statistics";
 import type { GpaRank, IdentityMode, SubjectStatistic, Visibility } from "@/lib/types";
 import { AdmissionBenefits } from "./AdmissionBenefits";
 import { getPodiumTheme, RankDisplay } from "./RankDisplay";
@@ -130,6 +131,7 @@ export function MyPage() {
           {grades.filter((grade) => grade.score != null).map((grade) => {
             const subject = SUBJECTS.find((item) => item.id === grade.subject_id);
             const statistic = subjectStatistics[grade.subject_id];
+            const deviation = subjectDeviationDisplay(statistic);
             const podium = statistic?.rank ? getPodiumTheme(statistic.rank) : null;
             return (
               <div key={grade.subject_id} className={`flex flex-wrap items-center gap-x-5 gap-y-2 px-6 py-4 ${podium?.row ?? "bg-white"}`}>
@@ -140,6 +142,9 @@ export function MyPage() {
                     ? <RankDisplay rank={statistic.rank} total={statistic.participantCount} />
                     : <span className="font-mono text-xs font-bold text-black/50">—</span>}
                 </div>
+                <span className="min-w-[150px] text-right font-mono text-xs font-bold text-black/50" title={deviation.note}>
+                  偏差値 {deviation.value}
+                </span>
                 <span className="flex items-center justify-end gap-1.5 text-xs font-bold text-black/45">
                   {grade.visibility === "public" ? <Eye size={14} /> : <EyeOff size={14} />}
                   {grade.visibility === "public" ? "Public" : "Private"}

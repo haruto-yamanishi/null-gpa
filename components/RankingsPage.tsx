@@ -16,7 +16,7 @@ import {
   hasRankingAccessForVisit,
   markRankingAccessForVisit,
 } from "@/lib/ranking-access";
-import type { RankingRow, SubjectRankingRow } from "@/lib/types";
+import type { RankingRow, SubjectRankingRow, SubjectStatistic } from "@/lib/types";
 import { RankingBoard } from "./RankingBoard";
 import { SubjectBoards } from "./SubjectBoards";
 
@@ -25,6 +25,7 @@ type AccessState = "checking" | "locked" | "challenge" | "ready";
 export function RankingsPage() {
   const [board, setBoard] = useState<RankingRow[]>([]);
   const [subjectBoards, setSubjectBoards] = useState<Record<string, SubjectRankingRow[]>>({});
+  const [subjectStatistics, setSubjectStatistics] = useState<Record<string, SubjectStatistic>>({});
   const [state, setState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [message, setMessage] = useState("");
   const [accessState, setAccessState] = useState<AccessState>("checking");
@@ -41,6 +42,7 @@ export function RankingsPage() {
       const result = await loadRankings();
       setBoard(result.board);
       setSubjectBoards(result.subjectBoards);
+      setSubjectStatistics(result.statistics);
       setState("ready");
     } catch (error) {
       console.error(error);
@@ -268,7 +270,7 @@ export function RankingsPage() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-2">
           <RankingBoard board={board} />
-          <SubjectBoards boards={subjectBoards} />
+          <SubjectBoards boards={subjectBoards} statistics={subjectStatistics} />
         </div>
       )}
     </main>

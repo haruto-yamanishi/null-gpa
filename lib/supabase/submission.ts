@@ -169,11 +169,12 @@ export async function saveSubmission(payload: SubmissionPayload) {
 
 export async function loadRankings() {
   await ensureSession();
-  const [board, subjectBoards] = await Promise.all([
+  const [board, subjectBoards, statistics] = await Promise.all([
     fetchLeaderboard(),
     fetchSubjectLeaderboards(SUBJECTS.map((subject) => subject.id)),
+    fetchSubjectStatistics(SUBJECTS.map((subject) => subject.id)),
   ]);
-  return { board, subjectBoards };
+  return { board, subjectBoards, statistics };
 }
 
 export async function fetchLeaderboard(): Promise<RankingRow[]> {

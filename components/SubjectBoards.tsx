@@ -2,10 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { SUBJECTS } from "@/lib/fixtures";
-import type { SubjectRankingRow } from "@/lib/types";
+import { subjectDeviationDisplay } from "@/lib/subject-statistics";
+import type { SubjectRankingRow, SubjectStatistic } from "@/lib/types";
 import { getPodiumTheme, RankDisplay } from "./RankDisplay";
 
-export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankingRow[]> }) {
+export function SubjectBoards({
+  boards,
+  statistics,
+}: {
+  boards: Record<string, SubjectRankingRow[]>;
+  statistics: Record<string, SubjectStatistic>;
+}) {
   const availableSubjectIds = useMemo(
     () => SUBJECTS.filter((subject) => (boards[subject.id]?.length ?? 0) > 0).map((subject) => subject.id),
     [boards],
@@ -17,6 +24,9 @@ export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankin
     : (availableSubjectIds[0] ?? selectedSubjectId);
   const subject = SUBJECTS.find((item) => item.id === effectiveSubjectId);
   const rows = boards[effectiveSubjectId] ?? [];
+  const statistic = statistics[effectiveSubjectId];
+  const deviation = subjectDeviationDisplay(statistic);
+  const participantCount = rows[0]?.participantCount ?? 0;
 
   return (
     <section className="k-card overflow-hidden">
@@ -33,6 +43,22 @@ export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankin
             <option key={item.id} value={item.id}>{item.name}</option>
           ))}
         </select>
+
+        {rows.length > 0 && (
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-[4px] border border-black/10 bg-neutral-50 px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-black/35">科目参加者</p>
+              <p className="mt-1 font-mono text-xl font-black">{participantCount} <span className="text-xs text-black/35">/ 40</span></p>
+            </div>
+            <div className="rounded-[4px] border border-black/10 bg-neutral-50 px-4 py-3">
+              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-black/35">あなたの偏差値</p>
+              <p className="mt-1 font-mono text-xl font-black">{deviation.value}</p>
+            </div>
+            <p className="col-span-2 text-xs font-medium text-black/40">
+              GPA参加者数とは別に、{deviation.note}。
+            </p>
+          </div>
+        )}
       </div>
 
       {rows.length === 0 ? (
