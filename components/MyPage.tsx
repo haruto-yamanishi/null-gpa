@@ -184,7 +184,7 @@ function OverallRank({ rank, total }: { rank: number; total: number }) {
             <Icon size={27} strokeWidth={2.3} aria-hidden />
           </span>
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/45">Top three · {podium.label}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-black/45">Top three</p>
             <h2 className="mt-1 text-2xl font-black tracking-[-0.035em]">トップ3、おめでとう。</h2>
           </div>
         </div>
