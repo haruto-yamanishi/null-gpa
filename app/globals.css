@@ -9,7 +9,7 @@
   --muted: #666666;
   --line: rgba(0, 0, 0, 0.055);
   --border: rgba(0, 0, 0, 0.14);
-  --panel: rgba(255, 255, 255, 0.88);
+  --panel: #ffffff;
 }
 
 * {
@@ -60,7 +60,7 @@ select {
 
 @layer components {
   .k-card {
-    @apply rounded-[22px] border border-black/15 bg-white/90 backdrop-blur-[2px];
+    @apply rounded-[22px] border border-black/15 bg-white;
   }
 
   .k-label {
