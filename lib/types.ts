@@ -41,3 +41,13 @@ export type SubjectStatistic = {
   median: number | null;
   deviation: number | null;
 };
+
+export type SubjectRankingRow = {
+  subjectId: string;
+  rank: number;
+  participantCount: number;
+  pseudonym: string;
+  displayName: string | null;
+  score: number | null;
+  isMe: boolean;
+};

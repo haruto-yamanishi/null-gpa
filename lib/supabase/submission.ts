@@ -2,9 +2,11 @@ import type {
   GradeInput,
   IdentityMode,
   RankingRow,
+  SubjectRankingRow,
   SubjectStatistic,
   Visibility,
 } from "@/lib/types";
+import { SUBJECTS } from "@/lib/fixtures";
 import { getSupabaseBrowserClient } from "./client";
 
 export type SubmissionPayload = {
@@ -59,12 +61,13 @@ export async function saveSubmission(payload: SubmissionPayload) {
   const { error: refreshError } = await supabase.rpc("refresh_my_gpa");
   if (refreshError) throw refreshError;
 
-  const [board, statistics] = await Promise.all([
+  const [board, statistics, subjectBoards] = await Promise.all([
     fetchLeaderboard(),
     fetchSubjectStatistics(payload.grades.filter((grade) => grade.score != null).map((grade) => grade.subjectId)),
+    fetchSubjectLeaderboards(SUBJECTS.map((subject) => subject.id)),
   ]);
 
-  return { board, statistics };
+  return { board, statistics, subjectBoards };
 }
 
 export async function fetchLeaderboard(): Promise<RankingRow[]> {
@@ -112,4 +115,30 @@ export async function fetchSubjectStatistics(subjectIds: string[]) {
   return Object.fromEntries(
     entries.filter((entry): entry is SubjectStatistic => entry != null).map((entry) => [entry.subjectId, entry]),
   );
+}
+
+export async function fetchSubjectLeaderboards(subjectIds: string[]) {
+  const supabase = getSupabaseBrowserClient();
+  const entries = await Promise.all(
+    subjectIds.map(async (subjectId) => {
+      const { data, error } = await supabase.rpc("get_subject_leaderboard", {
+        p_subject_id: subjectId,
+      });
+      if (error) throw error;
+
+      const rows: SubjectRankingRow[] = (data ?? []).map((row: Record<string, unknown>) => ({
+        subjectId,
+        rank: Number(row.rank),
+        participantCount: Number(row.participant_count),
+        pseudonym: String(row.pseudonym),
+        displayName: row.display_name == null ? null : String(row.display_name),
+        score: row.score == null ? null : Number(row.score),
+        isMe: Boolean(row.is_me),
+      }));
+
+      return [subjectId, rows] as const;
+    }),
+  );
+
+  return Object.fromEntries(entries) as Record<string, SubjectRankingRow[]>;
 }

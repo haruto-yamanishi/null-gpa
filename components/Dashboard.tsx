@@ -9,12 +9,14 @@ import type {
   GradeInput,
   IdentityMode,
   RankingRow,
+  SubjectRankingRow,
   SubjectStatistic,
   Visibility,
 } from "@/lib/types";
 import { GradeTable } from "./GradeTable";
 import { PrivacyControls } from "./PrivacyControls";
 import { RankingBoard } from "./RankingBoard";
+import { SubjectBoards } from "./SubjectBoards";
 
 const initialScores: Record<string, number | null> = Object.fromEntries(
   SUBJECTS.map((subject) => [subject.id, null]),
@@ -32,6 +34,7 @@ export default function Dashboard() {
   const [visibilities, setVisibilities] = useState(initialVisibilities);
   const [board, setBoard] = useState<RankingRow[]>([]);
   const [subjectStats, setSubjectStats] = useState<Record<string, SubjectStatistic>>({});
+  const [subjectBoards, setSubjectBoards] = useState<Record<string, SubjectRankingRow[]>>({});
   const [submitState, setSubmitState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -89,6 +92,7 @@ export default function Dashboard() {
       });
       setBoard(result.board);
       setSubjectStats(result.statistics);
+      setSubjectBoards(result.subjectBoards);
       setSubmitState("saved");
       setMessage("保存しました。ランキングと科目統計を更新しました。");
     } catch (error) {
@@ -177,6 +181,7 @@ export default function Dashboard() {
           </section>
 
           <RankingBoard board={board} />
+          <SubjectBoards boards={subjectBoards} />
 
           <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
             <div className="flex items-start gap-3">
@@ -184,7 +189,7 @@ export default function Dashboard() {
               <div>
                 <p className="font-bold">今日公開するMVPの境界</p>
                 <p className="mt-1 text-sm leading-6 text-zinc-500">
-                  他ユーザーはRLSによりあなたの生点数を直接取得できません。一方、無料構成ではSupabaseプロジェクト管理者はtrust boundary内です。製作者にも絶対に見えない、とは表示しません。
+                  他ユーザーはRLSによりあなたの生点数を直接取得できません。Privateの科目点数は数値非公開ですが、順位はランキング機能として表示されます。一方、無料構成ではSupabaseプロジェクト管理者はtrust boundary内です。製作者にも絶対に見えない、とは表示しません。
                 </p>
               </div>
             </div>
