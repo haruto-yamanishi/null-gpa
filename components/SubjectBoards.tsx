@@ -22,11 +22,11 @@ export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankin
       <div className="border-b border-black/10 p-6 sm:p-7">
         <p className="k-label">Subject ranking</p>
         <h2 className="mt-2 text-3xl font-black tracking-[-0.03em]">科目別ランキング</h2>
-        <p className="mt-2 text-xs font-medium text-black/40">Privateの点数は数値を表示しません。</p>
+        <p className="mt-2 text-xs font-medium text-black/40">Privateの点数・出席番号は数値を表示しません。</p>
         <select
           value={effectiveSubjectId}
           onChange={(event) => setSelectedSubjectId(event.target.value)}
-          className="mt-5 w-full rounded-xl border border-black/20 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-black"
+          className="mt-5 w-full rounded-[4px] border border-black/20 bg-white px-4 py-3 text-sm font-bold outline-none focus:border-black"
         >
           {SUBJECTS.map((item) => (
             <option key={item.id} value={item.id}>{item.name}</option>
@@ -40,7 +40,8 @@ export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankin
         <div className="divide-y divide-black/10">
           {rows.slice(0, 50).map((entry) => {
             const baseLabel = entry.displayName || entry.pseudonym;
-            const label = entry.isMe ? `${baseLabel} · YOU` : baseLabel;
+            const seatLabel = entry.seatNumber == null ? "" : `No.${entry.seatNumber} · `;
+            const label = `${seatLabel}${baseLabel}${entry.isMe ? " · YOU" : ""}`;
             return (
               <div
                 key={`${effectiveSubjectId}-${entry.rank}-${entry.pseudonym}`}
