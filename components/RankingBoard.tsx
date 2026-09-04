@@ -18,9 +18,11 @@ export function RankingBoard({ board }: { board: RankingRow[] }) {
       ) : (
         <div>
           {board.slice(0, 50).map((entry) => {
-            const label = entry.isMe
-              ? `YOU · ${entry.pseudonym}`
-              : entry.displayName || entry.pseudonym;
+            const label = entry.displayName
+              ? `${entry.displayName}${entry.isMe ? " · YOU" : ""}`
+              : entry.isMe
+                ? `YOU · ${entry.pseudonym}`
+                : entry.pseudonym;
 
             return (
               <div
