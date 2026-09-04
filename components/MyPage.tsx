@@ -5,7 +5,8 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import { SUBJECTS } from "@/lib/fixtures";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { IdentityMode, Visibility } from "@/lib/types";
+import { fetchSubjectStatistics } from "@/lib/supabase/submission";
+import type { IdentityMode, SubjectStatistic, Visibility } from "@/lib/types";
 
 type Profile = {
   pseudonym: string;
@@ -30,6 +31,7 @@ type GpaSnapshot = {
 export function MyPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [grades, setGrades] = useState<SavedGrade[]>([]);
+  const [subjectStatistics, setSubjectStatistics] = useState<Record<string, SubjectStatistic>>({});
   const [gpa, setGpa] = useState<GpaSnapshot | null>(null);
   const [state, setState] = useState<"loading" | "ready" | "empty" | "error">("loading");
   const [message, setMessage] = useState("");
@@ -45,10 +47,11 @@ export function MyPage() {
           return;
         }
 
-        const [profileResult, gradesResult, gpaResult] = await Promise.all([
+        const [profileResult, gradesResult, gpaResult, statisticsResult] = await Promise.all([
           supabase.from("profiles").select("pseudonym, identity_mode, display_name, gpa_visibility, seat_number, seat_number_visibility").maybeSingle(),
           supabase.from("grade_submissions").select("subject_id, score, visibility").order("subject_id"),
           supabase.from("gpa_snapshots").select("gpa, graded_credits").maybeSingle(),
+          fetchSubjectStatistics(SUBJECTS.map((subject) => subject.id)),
         ]);
 
         if (profileResult.error) throw profileResult.error;
@@ -61,6 +64,7 @@ export function MyPage() {
 
         setProfile(profileResult.data as Profile);
         setGrades((gradesResult.data ?? []) as SavedGrade[]);
+        setSubjectStatistics(statisticsResult);
         setGpa(gpaResult.data as GpaSnapshot | null);
         setState("ready");
       } catch (error) {
@@ -118,10 +122,16 @@ export function MyPage() {
         <div className="divide-y divide-black/10">
           {grades.filter((grade) => grade.score != null).map((grade) => {
             const subject = SUBJECTS.find((item) => item.id === grade.subject_id);
+            const statistic = subjectStatistics[grade.subject_id];
             return (
-              <div key={grade.subject_id} className="grid grid-cols-[minmax(0,1fr)_80px_90px] items-center gap-3 bg-white px-6 py-4">
-                <span className="font-bold">{subject?.name ?? grade.subject_id}</span>
-                <span className="text-right font-mono font-bold">{grade.score == null ? "—" : Number(grade.score).toFixed(0)}</span>
+              <div key={grade.subject_id} className="flex flex-wrap items-center gap-x-5 gap-y-2 bg-white px-6 py-4">
+                <span className="min-w-0 basis-full font-bold sm:flex-1 sm:basis-auto">{subject?.name ?? grade.subject_id}</span>
+                <div className="flex min-w-[190px] items-baseline justify-between gap-5 sm:w-[230px]">
+                  <span className="font-mono text-lg font-black">{grade.score == null ? "—" : `${Number(grade.score).toFixed(0)}点`}</span>
+                  <span className="whitespace-nowrap text-xs font-bold text-black/50">
+                    参加者内 {statistic?.rank ? `#${statistic.rank} / ${statistic.participantCount}` : "—"}
+                  </span>
+                </div>
                 <span className="flex items-center justify-end gap-1.5 text-xs font-bold text-black/45">
                   {grade.visibility === "public" ? <Eye size={14} /> : <EyeOff size={14} />}
                   {grade.visibility === "public" ? "Public" : "Private"}
