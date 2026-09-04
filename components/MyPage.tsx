@@ -12,6 +12,8 @@ type Profile = {
   identity_mode: IdentityMode;
   display_name: string | null;
   gpa_visibility: Visibility;
+  seat_number: number;
+  seat_number_visibility: Visibility;
 };
 
 type SavedGrade = {
@@ -44,7 +46,7 @@ export function MyPage() {
         }
 
         const [profileResult, gradesResult, gpaResult] = await Promise.all([
-          supabase.from("profiles").select("pseudonym, identity_mode, display_name, gpa_visibility").maybeSingle(),
+          supabase.from("profiles").select("pseudonym, identity_mode, display_name, gpa_visibility, seat_number, seat_number_visibility").maybeSingle(),
           supabase.from("grade_submissions").select("subject_id, score, visibility").order("subject_id"),
           supabase.from("gpa_snapshots").select("gpa, graded_credits").maybeSingle(),
         ]);
@@ -89,7 +91,7 @@ export function MyPage() {
   }
 
   if (state === "error" || !profile) {
-    return <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6"><div className="rounded-2xl border border-black/20 bg-neutral-100 p-5 font-bold">{message || "データを表示できませんでした。"}</div></main>;
+    return <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6"><div className="rounded-[6px] border border-black/20 bg-neutral-100 p-5 font-bold">{message || "データを表示できませんでした。"}</div></main>;
   }
 
   const displayLabel = profile.identity_mode === "named" && profile.display_name ? profile.display_name : profile.pseudonym;
@@ -101,8 +103,9 @@ export function MyPage() {
         <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-6xl">{displayLabel}</h1>
       </div>
 
-      <section className="grid gap-3 sm:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Metric label="GPA" value={gpa ? Number(gpa.gpa).toFixed(2) : "—"} note={profile.gpa_visibility === "public" ? "Public" : "Private"} dark />
+        <Metric label="出席番号" value={String(profile.seat_number)} note={profile.seat_number_visibility === "public" ? "Public" : "Private"} />
         <Metric label="表示名" value={profile.identity_mode === "named" ? "Name" : "Anonymous"} note={profile.display_name ?? profile.pseudonym} />
         <Metric label="入力単位" value={gpa ? String(gpa.graded_credits) : "0"} note="単位" />
       </section>
@@ -138,7 +141,7 @@ export function MyPage() {
 
 function Metric({ label, value, note, dark = false }: { label: string; value: string; note: string; dark?: boolean }) {
   return (
-    <div className={`rounded-2xl border border-black/15 p-5 ${dark ? "bg-black text-white" : "bg-white"}`}>
+    <div className={`rounded-[6px] border border-black/15 p-5 ${dark ? "bg-black text-white" : "bg-white"}`}>
       <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${dark ? "text-white/45" : "text-black/40"}`}>{label}</p>
       <p className="mt-2 break-words text-2xl font-black tracking-tight">{value}</p>
       <p className={`mt-1 truncate text-xs font-medium ${dark ? "text-white/45" : "text-black/40"}`}>{note}</p>
