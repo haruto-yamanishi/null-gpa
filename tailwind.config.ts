@@ -5,7 +5,17 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: [
+          "Hiragino Kaku Gothic ProN",
+          "Hiragino Sans",
+          "Yu Gothic",
+          "YuGothic",
+          "Noto Sans JP",
+          "Arial",
+          "ui-sans-serif",
+          "system-ui",
+          "sans-serif",
+        ],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
     },
