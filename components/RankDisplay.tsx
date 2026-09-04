@@ -24,11 +24,11 @@ export function RankDisplay({ rank, total }: { rank: number; total?: number }) {
   const Icon = rank === 1 ? Crown : Medal;
 
   if (!theme) {
-    return <span className="whitespace-nowrap font-mono font-black">#{rank}{total ? ` / ${total}` : ""}</span>;
+    return <span className="justify-self-start whitespace-nowrap font-mono font-black">#{rank}{total ? ` / ${total}` : ""}</span>;
   }
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-black ${theme.badge}`}>
+    <span className={`inline-flex w-fit justify-self-start items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-black ${theme.badge}`}>
       <Icon size={14} strokeWidth={2.5} aria-hidden />
       #{rank}{total ? ` / ${total}` : ""}
     </span>
