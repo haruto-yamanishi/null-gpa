@@ -1,0 +1,38 @@
+name: Release provenance
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  id-token: write
+  attestations: write
+
+jobs:
+  attest-source-manifest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm install --no-audit --no-fund
+      - run: npm test
+      - run: npm run build
+      - name: Create release manifest
+        run: |
+          mkdir -p dist
+          cat > dist/release-manifest.json <<JSON
+          {
+            "repository": "${GITHUB_REPOSITORY}",
+            "commit": "${GITHUB_SHA}",
+            "ref": "${GITHUB_REF}",
+            "enclavePcr0": "NOT_BUILT_YET",
+            "enclaveImageSha384": "NOT_BUILT_YET"
+          }
+          JSON
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: dist/release-manifest.json
