@@ -51,6 +51,13 @@ export default function Dashboard() {
   const { gpa, credits } = useMemo(() => calculateGpa(SUBJECTS, grades), [grades]);
   const mine = board.find((entry) => entry.isMe);
 
+  function clearStaleMessage() {
+    if (submitState === "error") {
+      setSubmitState("idle");
+      setMessage("");
+    }
+  }
+
   async function submit() {
     if (!backendConfigured) {
       setSubmitState("error");
@@ -117,9 +124,18 @@ export default function Dashboard() {
           identityMode={identityMode}
           displayName={displayName}
           gpaVisibility={gpaVisibility}
-          onIdentityModeChange={setIdentityMode}
-          onDisplayNameChange={setDisplayName}
-          onGpaVisibilityChange={setGpaVisibility}
+          onIdentityModeChange={(value) => {
+            clearStaleMessage();
+            setIdentityMode(value);
+          }}
+          onDisplayNameChange={(value) => {
+            clearStaleMessage();
+            setDisplayName(value);
+          }}
+          onGpaVisibilityChange={(value) => {
+            clearStaleMessage();
+            setGpaVisibility(value);
+          }}
         />
       </section>
 
@@ -128,8 +144,14 @@ export default function Dashboard() {
           scores={scores}
           visibilities={visibilities}
           analytics={subjectStats}
-          onScoreChange={(subjectId, score) => setScores((current) => ({ ...current, [subjectId]: score }))}
-          onVisibilityChange={(subjectId, visibility) => setVisibilities((current) => ({ ...current, [subjectId]: visibility }))}
+          onScoreChange={(subjectId, score) => {
+            clearStaleMessage();
+            setScores((current) => ({ ...current, [subjectId]: score }));
+          }}
+          onVisibilityChange={(subjectId, visibility) => {
+            clearStaleMessage();
+            setVisibilities((current) => ({ ...current, [subjectId]: visibility }));
+          }}
         />
 
         <div className="space-y-6">
