@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { SUBJECTS } from "@/lib/fixtures";
 import { calculateGpa } from "@/lib/grading";
+import { markRankingAccessForVisit } from "@/lib/ranking-access";
 import { saveSubmission } from "@/lib/supabase/submission";
 import type {
   GradeInput,
@@ -97,6 +98,7 @@ export default function Dashboard() {
         seatNumberVisibility,
         grades,
       });
+      markRankingAccessForVisit();
       setBoard(result.board);
       setSubjectStats(result.statistics);
       setSubmitState("saved");

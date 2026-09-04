@@ -11,11 +11,14 @@ import {
   verifyRankingReentry,
   type RankingReentryChallenge,
 } from "@/lib/supabase/submission";
+import {
+  clearRankingAccessForVisit,
+  hasRankingAccessForVisit,
+  markRankingAccessForVisit,
+} from "@/lib/ranking-access";
 import type { RankingRow, SubjectRankingRow } from "@/lib/types";
 import { RankingBoard } from "./RankingBoard";
 import { SubjectBoards } from "./SubjectBoards";
-
-const VISIT_ACCESS_KEY = "null-gpa-ranking-access";
 
 type AccessState = "checking" | "locked" | "challenge" | "ready";
 
@@ -42,7 +45,7 @@ export function RankingsPage() {
     } catch (error) {
       console.error(error);
       if (error instanceof Error && error.message === RANKING_ACCESS_REQUIRED) {
-        sessionStorage.removeItem(VISIT_ACCESS_KEY);
+        clearRankingAccessForVisit();
         setAccessState("locked");
         setState("idle");
         setAuthMessage("ランキングを見るには成績登録または再認証が必要です。");
@@ -64,7 +67,7 @@ export function RankingsPage() {
           return;
         }
 
-        if (sessionStorage.getItem(VISIT_ACCESS_KEY) === "1") {
+        if (hasRankingAccessForVisit()) {
           setAccessState("ready");
           await refresh();
           return;
@@ -124,7 +127,7 @@ export function RankingsPage() {
         return;
       }
 
-      sessionStorage.setItem(VISIT_ACCESS_KEY, "1");
+      markRankingAccessForVisit();
       setAccessState("ready");
       setChallenge(null);
       await refresh();
