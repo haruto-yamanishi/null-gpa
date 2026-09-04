@@ -28,6 +28,8 @@ export default function Dashboard() {
   const [identityMode, setIdentityMode] = useState<IdentityMode>("named");
   const [displayName, setDisplayName] = useState("");
   const [gpaVisibility, setGpaVisibility] = useState<Visibility>("public");
+  const [seatNumber, setSeatNumber] = useState<number | null>(null);
+  const [seatNumberVisibility, setSeatNumberVisibility] = useState<Visibility>("private");
   const [scores, setScores] = useState(initialScores);
   const [visibilities, setVisibilities] = useState(initialVisibilities);
   const [board, setBoard] = useState<RankingRow[]>([]);
@@ -65,6 +67,12 @@ export default function Dashboard() {
       return;
     }
 
+    if (seatNumber == null || seatNumber < 401 || seatNumber > 440) {
+      setSubmitState("error");
+      setMessage("出席番号401〜440を選択してください。");
+      return;
+    }
+
     if (identityMode === "named" && !displayName.trim()) {
       setSubmitState("error");
       setMessage("名前を入力してください。匿名で参加する場合はAnonymousを選べます。");
@@ -85,6 +93,8 @@ export default function Dashboard() {
         identityMode,
         displayName,
         gpaVisibility,
+        seatNumber,
+        seatNumberVisibility,
         grades,
       });
       setBoard(result.board);
@@ -105,20 +115,21 @@ export default function Dashboard() {
           <p className="k-label">Grade entry</p>
           <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-6xl">成績を登録</h1>
           <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-black/50">
-            点数を入力するとGPAを自動計算します。公開設定は名前・GPA・各科目ごとに変更できます。
+            出席番号と点数を入力するとGPAを自動計算します。名前・出席番号・GPA・各科目はそれぞれ公開設定を変更できます。
           </p>
         </div>
-        <div className="rounded-full border border-black/20 px-4 py-2 text-xs font-bold text-black/60">
-          2026 / 4年
+        <div className="rounded-[4px] border border-black/20 px-4 py-2 text-xs font-bold text-black/60">
+          2026 / 4年 / 401–440
         </div>
       </div>
 
       <section className="mb-7 grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <div className="k-card p-6 sm:p-8">
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <Metric label="GPA" value={gpa == null ? "—" : gpa.toFixed(2)} note={`${credits}単位`} accent />
             <Metric label="参加者内順位" value={mine ? `#${mine.rank} / ${mine.participantCount}` : "—"} note="保存後に表示" />
             <Metric label="上位率" value={mine ? `${mine.topPercent.toFixed(1)}%` : "—"} note="参加者内" />
+            <Metric label="参加者" value={mine ? `${mine.participantCount} / 40` : "— / 40"} note="4年生" />
           </div>
         </div>
 
@@ -126,9 +137,12 @@ export default function Dashboard() {
           identityMode={identityMode}
           displayName={displayName}
           gpaVisibility={gpaVisibility}
+          seatNumber={seatNumber}
+          seatNumberVisibility={seatNumberVisibility}
           onIdentityModeChange={(value) => {
             clearStaleMessage();
             setIdentityMode(value);
+            if (value === "anonymous") setSeatNumberVisibility("private");
           }}
           onDisplayNameChange={(value) => {
             clearStaleMessage();
@@ -137,6 +151,14 @@ export default function Dashboard() {
           onGpaVisibilityChange={(value) => {
             clearStaleMessage();
             setGpaVisibility(value);
+          }}
+          onSeatNumberChange={(value) => {
+            clearStaleMessage();
+            setSeatNumber(value);
+          }}
+          onSeatNumberVisibilityChange={(value) => {
+            clearStaleMessage();
+            setSeatNumberVisibility(value);
           }}
         />
       </section>
@@ -160,7 +182,7 @@ export default function Dashboard() {
           <div>
             <p className="k-label">Save</p>
             <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">ランキングに反映</h2>
-            <p className="mt-2 text-sm font-medium text-black/45">保存後も同じブラウザから何度でも更新できます。</p>
+            <p className="mt-2 text-sm font-medium text-black/45">同じ出席番号は1ユーザーのみ。保存後も同じブラウザから何度でも更新できます。</p>
           </div>
           <button type="button" onClick={submit} disabled={submitState === "saving"} className="k-button min-w-56 gap-2">
             {submitState === "saving" ? "保存中…" : "保存する"}
@@ -187,7 +209,7 @@ export default function Dashboard() {
 
 function Metric({ label, value, note, accent = false }: { label: string; value: string; note: string; accent?: boolean }) {
   return (
-    <div className={`rounded-2xl border border-black/15 p-5 ${accent ? "bg-black text-white" : "bg-white"}`}>
+    <div className={`rounded-[6px] border border-black/15 p-5 ${accent ? "bg-black text-white" : "bg-white"}`}>
       <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${accent ? "text-white/45" : "text-black/40"}`}>{label}</p>
       <p className="mt-2 font-mono text-3xl font-black tracking-tight">{value}</p>
       <p className={`mt-1 text-xs font-bold ${accent ? "text-white/45" : "text-black/40"}`}>{note}</p>
