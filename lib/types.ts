@@ -21,3 +21,23 @@ export type Participant = {
   gpaVisibility: Visibility;
   grades: Record<string, { score: number; visibility: Visibility }>;
 };
+
+export type RankingRow = {
+  rank: number;
+  participantCount: number;
+  topPercent: number;
+  pseudonym: string;
+  displayName: string | null;
+  gpa: number | null;
+  isMe: boolean;
+};
+
+export type SubjectStatistic = {
+  subjectId: string;
+  score: number | null;
+  rank: number | null;
+  participantCount: number;
+  average: number | null;
+  median: number | null;
+  deviation: number | null;
+};
