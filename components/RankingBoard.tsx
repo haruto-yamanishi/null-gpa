@@ -3,12 +3,17 @@
 import type { RankingRow } from "@/lib/types";
 
 export function RankingBoard({ board }: { board: RankingRow[] }) {
+  const participantCount = board[0]?.participantCount ?? 0;
+
   return (
     <section className="k-card overflow-hidden">
       <div className="border-b border-black/10 p-6 sm:p-7">
         <p className="k-label">GPA ranking</p>
         <h2 className="mt-2 text-3xl font-black tracking-[-0.03em]">GPAランキング</h2>
-        <p className="mt-2 text-xs font-medium text-black/40">参加者内順位</p>
+        <div className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs font-bold text-black/45">
+          <span>参加者内順位</span>
+          <span>参加者 {participantCount} / 40</span>
+        </div>
       </div>
 
       {board.length === 0 ? (
@@ -17,7 +22,8 @@ export function RankingBoard({ board }: { board: RankingRow[] }) {
         <div className="divide-y divide-black/10">
           {board.slice(0, 50).map((entry) => {
             const baseLabel = entry.displayName || entry.pseudonym;
-            const label = entry.isMe ? `${baseLabel} · YOU` : baseLabel;
+            const seatLabel = entry.seatNumber == null ? "" : `No.${entry.seatNumber} · `;
+            const label = `${seatLabel}${baseLabel}${entry.isMe ? " · YOU" : ""}`;
 
             return (
               <div
