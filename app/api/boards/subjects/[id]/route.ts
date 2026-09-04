@@ -17,9 +17,10 @@ export async function GET(_: Request, { params }: { params: Promise<{ id: string
     label: entry.participant.identityMode === "named" && entry.participant.displayName
       ? entry.participant.displayName
       : `ANON-${entry.participant.accountId.slice(-2).toUpperCase()}••`,
+    seatNumber: entry.participant.seatNumberVisibility === "public" ? entry.participant.seatNumber : null,
     value: entry.grade.visibility === "public" ? entry.grade.score : null,
     valueVisibility: entry.grade.visibility,
   }));
 
-  return NextResponse.json({ subject, n: ranked.length, rows: ranked });
+  return NextResponse.json({ subject, n: ranked.length, classSize: 40, rows: ranked });
 }
