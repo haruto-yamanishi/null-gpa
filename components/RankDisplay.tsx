@@ -4,17 +4,14 @@ const podiumThemes = {
   1: {
     row: "bg-[linear-gradient(90deg,#fff0a6_0%,#fffdf3_72%)] shadow-[inset_4px_0_0_#d49b00]",
     badge: "border-[#9f7200] bg-[#f7c948] text-black",
-    label: "GOLD",
   },
   2: {
     row: "bg-[linear-gradient(90deg,#e8ebef_0%,#fbfbfb_72%)] shadow-[inset_4px_0_0_#8c96a3]",
     badge: "border-[#77818c] bg-[#dce1e7] text-black",
-    label: "SILVER",
   },
   3: {
     row: "bg-[linear-gradient(90deg,#f4cfb2_0%,#fffaf6_72%)] shadow-[inset_4px_0_0_#a95f2f]",
     badge: "border-[#8e4e27] bg-[#d99665] text-black",
-    label: "BRONZE",
   },
 } as const;
 
@@ -34,7 +31,6 @@ export function RankDisplay({ rank, total }: { rank: number; total?: number }) {
     <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-xs font-black ${theme.badge}`}>
       <Icon size={14} strokeWidth={2.5} aria-hidden />
       #{rank}{total ? ` / ${total}` : ""}
-      <span className="hidden text-[9px] tracking-[0.12em] sm:inline">{theme.label}</span>
     </span>
   );
 }
