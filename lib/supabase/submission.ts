@@ -34,6 +34,27 @@ export async function ensureSession() {
   return { supabase, user: data.user };
 }
 
+function normalizeSupabaseError(error: unknown): Error {
+  if (error instanceof Error) return error;
+
+  if (error && typeof error === "object") {
+    const value = error as { code?: string; message?: string; details?: string; hint?: string };
+
+    if (value.code === "23505") {
+      return new Error("この出席番号はすでに登録されています。登録したブラウザから更新してください。");
+    }
+
+    if (value.code === "42703" || value.code === "PGRST204") {
+      return new Error("出席番号用のDB更新がまだ反映されていません。Supabaseで最新migrationを実行してください。");
+    }
+
+    const detail = [value.message, value.details, value.hint].filter(Boolean).join(" / ");
+    if (detail) return new Error(detail);
+  }
+
+  return new Error("保存に失敗しました。");
+}
+
 export async function saveSubmission(payload: SubmissionPayload) {
   const { supabase, user } = await ensureSession();
   const displayName = payload.identityMode === "named" ? payload.displayName.trim() : null;
@@ -47,12 +68,7 @@ export async function saveSubmission(payload: SubmissionPayload) {
     seat_number_visibility: payload.seatNumberVisibility,
     updated_at: new Date().toISOString(),
   });
-  if (profileError) {
-    if (profileError.code === "23505") {
-      throw new Error("この出席番号はすでに登録されています。別の番号は選ばず、登録したブラウザから更新してください。");
-    }
-    throw profileError;
-  }
+  if (profileError) throw normalizeSupabaseError(profileError);
 
   const gradeRows = payload.grades.map((grade) => ({
     user_id: user.id,
@@ -65,10 +81,10 @@ export async function saveSubmission(payload: SubmissionPayload) {
   const { error: gradesError } = await supabase.from("grade_submissions").upsert(gradeRows, {
     onConflict: "user_id,subject_id",
   });
-  if (gradesError) throw gradesError;
+  if (gradesError) throw normalizeSupabaseError(gradesError);
 
   const { error: refreshError } = await supabase.rpc("refresh_my_gpa");
-  if (refreshError) throw refreshError;
+  if (refreshError) throw normalizeSupabaseError(refreshError);
 
   const [board, statistics, subjectBoards] = await Promise.all([
     fetchLeaderboard(),
@@ -91,7 +107,7 @@ export async function loadRankings() {
 export async function fetchLeaderboard(): Promise<RankingRow[]> {
   const supabase = getSupabaseBrowserClient();
   const { data, error } = await supabase.rpc("get_gpa_leaderboard");
-  if (error) throw error;
+  if (error) throw normalizeSupabaseError(error);
 
   return (data ?? []).map((row: Record<string, unknown>) => ({
     rank: Number(row.rank),
@@ -112,7 +128,7 @@ export async function fetchSubjectStatistics(subjectIds: string[]) {
       const { data, error } = await supabase.rpc("get_subject_statistics", {
         p_subject_id: subjectId,
       });
-      if (error) throw error;
+      if (error) throw normalizeSupabaseError(error);
 
       const row = data?.[0] as Record<string, unknown> | undefined;
       if (!row) return null;
@@ -143,7 +159,7 @@ export async function fetchSubjectLeaderboards(subjectIds: string[]) {
       const { data, error } = await supabase.rpc("get_subject_leaderboard", {
         p_subject_id: subjectId,
       });
-      if (error) throw error;
+      if (error) throw normalizeSupabaseError(error);
 
       const rows: SubjectRankingRow[] = (data ?? []).map((row: Record<string, unknown>) => ({
         subjectId,
