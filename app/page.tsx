@@ -62,7 +62,7 @@ export default function HomePage() {
           <Link
             key={href}
             href={href}
-            className={`group border-b border-black/15 bg-white/40 py-9 backdrop-blur-[1px] transition hover:bg-white/75 md:border-b-0 md:px-8 md:py-12 ${index > 0 ? "md:border-l md:border-black/15" : "md:pl-0"}`}
+            className={`group border-b border-black/15 bg-white/40 px-5 py-9 backdrop-blur-[1px] transition hover:bg-white/75 sm:px-8 md:border-b-0 md:px-8 md:py-12 ${index > 0 ? "md:border-l md:border-black/15" : ""}`}
           >
             <div className="flex items-start justify-between gap-5">
               <span className="grid size-11 place-items-center rounded-full border border-black/15 bg-white/80">
