@@ -60,7 +60,7 @@ select {
 
 @layer components {
   .k-card {
-    @apply rounded-[22px] border border-black/15 bg-white;
+    @apply rounded-[8px] border border-black/15 bg-white;
   }
 
   .k-label {
@@ -68,15 +68,15 @@ select {
   }
 
   .k-input {
-    @apply w-full rounded-xl border border-black/20 bg-white/95 px-4 py-3 text-black outline-none transition focus:border-black;
+    @apply w-full rounded-[4px] border border-black/20 bg-white px-4 py-3 text-black outline-none transition focus:border-black;
   }
 
   .k-button {
-    @apply inline-flex min-h-12 items-center justify-center rounded-full border border-black bg-black px-5 py-3 font-bold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40;
+    @apply inline-flex min-h-12 items-center justify-center rounded-[4px] border border-black bg-black px-5 py-3 font-bold text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-40;
   }
 
   .k-button-secondary {
-    @apply inline-flex min-h-12 items-center justify-center rounded-full border border-black bg-white/90 px-5 py-3 font-bold text-black transition hover:bg-black hover:text-white;
+    @apply inline-flex min-h-12 items-center justify-center rounded-[4px] border border-black bg-white px-5 py-3 font-bold text-black transition hover:bg-black hover:text-white;
   }
 
   .k-display {
@@ -90,4 +90,13 @@ select {
   .k-section-tag-mark {
     @apply inline-flex bg-black px-2.5 py-2 text-xl font-black leading-none text-white;
   }
+}
+
+.rounded-2xl {
+  border-radius: 8px;
+}
+
+.rounded-xl,
+.rounded-lg {
+  border-radius: 6px;
 }
