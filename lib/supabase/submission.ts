@@ -13,6 +13,8 @@ export type SubmissionPayload = {
   identityMode: IdentityMode;
   displayName: string;
   gpaVisibility: Visibility;
+  seatNumber: number;
+  seatNumberVisibility: Visibility;
   grades: GradeInput[];
 };
 
@@ -41,9 +43,16 @@ export async function saveSubmission(payload: SubmissionPayload) {
     identity_mode: payload.identityMode,
     display_name: displayName || null,
     gpa_visibility: payload.gpaVisibility,
+    seat_number: payload.seatNumber,
+    seat_number_visibility: payload.seatNumberVisibility,
     updated_at: new Date().toISOString(),
   });
-  if (profileError) throw profileError;
+  if (profileError) {
+    if (profileError.code === "23505") {
+      throw new Error("この出席番号はすでに登録されています。別の番号は選ばず、登録したブラウザから更新してください。");
+    }
+    throw profileError;
+  }
 
   const gradeRows = payload.grades.map((grade) => ({
     user_id: user.id,
@@ -90,6 +99,7 @@ export async function fetchLeaderboard(): Promise<RankingRow[]> {
     topPercent: Number(row.top_percent),
     pseudonym: String(row.pseudonym),
     displayName: row.display_name == null ? null : String(row.display_name),
+    seatNumber: row.seat_number == null ? null : Number(row.seat_number),
     gpa: row.gpa == null ? null : Number(row.gpa),
     isMe: Boolean(row.is_me),
   }));
@@ -141,6 +151,7 @@ export async function fetchSubjectLeaderboards(subjectIds: string[]) {
         participantCount: Number(row.participant_count),
         pseudonym: String(row.pseudonym),
         displayName: row.display_name == null ? null : String(row.display_name),
+        seatNumber: row.seat_number == null ? null : Number(row.seat_number),
         score: row.score == null ? null : Number(row.score),
         isMe: Boolean(row.is_me),
       }));
