@@ -18,6 +18,13 @@ export type SubmissionPayload = {
   grades: GradeInput[];
 };
 
+export type RankingReentryChallenge = {
+  subjectId: string;
+  subjectName: string;
+};
+
+export const RANKING_ACCESS_REQUIRED = "RANKING_ACCESS_REQUIRED";
+
 export async function ensureSession() {
   const supabase = getSupabaseBrowserClient();
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
@@ -34,6 +41,16 @@ export async function ensureSession() {
   return { supabase, user: data.user };
 }
 
+function isMissingRpcError(error: unknown) {
+  if (!error || typeof error !== "object") return false;
+  const value = error as { code?: string; message?: string };
+  return (
+    value.code === "PGRST202" ||
+    value.code === "42883" ||
+    value.message?.toLowerCase().includes("function") === true && value.message?.toLowerCase().includes("not found") === true
+  );
+}
+
 function normalizeSupabaseError(error: unknown): Error {
   if (error instanceof Error) return error;
 
@@ -48,11 +65,63 @@ function normalizeSupabaseError(error: unknown): Error {
       return new Error("出席番号用のDB更新がまだ反映されていません。Supabaseで最新migrationを実行してください。");
     }
 
+    if (value.code === "42501" && value.message?.includes("ranking access verification required")) {
+      return new Error(RANKING_ACCESS_REQUIRED);
+    }
+
     const detail = [value.message, value.details, value.hint].filter(Boolean).join(" / ");
     if (detail) return new Error(detail);
   }
 
   return new Error("保存に失敗しました。");
+}
+
+async function grantRankingAccessAfterSubmission() {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.rpc("grant_ranking_access_after_submission");
+  if (error) {
+    // Compatibility while the production database is being migrated.
+    if (isMissingRpcError(error)) return false;
+    throw normalizeSupabaseError(error);
+  }
+  return Boolean(data);
+}
+
+export async function isRankingReentryInstalled() {
+  await ensureSession();
+  const supabase = getSupabaseBrowserClient();
+  const { error } = await supabase.rpc("has_ranking_access");
+  if (!error) return true;
+  if (isMissingRpcError(error)) return false;
+  throw normalizeSupabaseError(error);
+}
+
+export async function beginRankingReentry(seatNumber: number): Promise<RankingReentryChallenge | null> {
+  await ensureSession();
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.rpc("begin_ranking_reentry", {
+    p_seat_number: seatNumber,
+  });
+  if (error) throw normalizeSupabaseError(error);
+
+  const row = data?.[0] as Record<string, unknown> | undefined;
+  if (!row) return null;
+
+  return {
+    subjectId: String(row.subject_id),
+    subjectName: String(row.subject_name),
+  };
+}
+
+export async function verifyRankingReentry(seatNumber: number, score: number) {
+  await ensureSession();
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.rpc("verify_ranking_reentry", {
+    p_seat_number: seatNumber,
+    p_score: score,
+  });
+  if (error) throw normalizeSupabaseError(error);
+  return Boolean(data);
 }
 
 export async function saveSubmission(payload: SubmissionPayload) {
@@ -85,6 +154,8 @@ export async function saveSubmission(payload: SubmissionPayload) {
 
   const { error: refreshError } = await supabase.rpc("refresh_my_gpa");
   if (refreshError) throw normalizeSupabaseError(refreshError);
+
+  await grantRankingAccessAfterSubmission();
 
   const [board, statistics, subjectBoards] = await Promise.all([
     fetchLeaderboard(),
