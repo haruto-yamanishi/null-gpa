@@ -72,16 +72,16 @@ export function MyPage() {
   }, []);
 
   if (state === "loading") {
-    return <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6"><div className="k-card p-10 text-center text-sm font-black text-black/45">読み込み中…</div></main>;
+    return <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6"><div className="k-card p-10 text-center text-sm font-bold text-black/40">読み込み中…</div></main>;
   }
 
   if (state === "empty") {
     return (
       <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6">
-        <div className="k-card p-8 sm:p-10">
+        <div className="border-b border-black/15 pb-10">
           <p className="k-label">My page</p>
-          <h1 className="mt-2 text-4xl font-black tracking-tight">まだ成績が保存されていません</h1>
-          <p className="mt-4 text-sm font-medium text-black/55">このブラウザから成績を登録すると、ここで保存内容を確認できます。</p>
+          <h1 className="mt-3 text-4xl font-black tracking-[-0.04em] sm:text-6xl">まだ成績が保存されていません</h1>
+          <p className="mt-5 text-sm font-medium text-black/50">このブラウザから成績を登録すると、ここで保存内容を確認できます。</p>
           <Link href="/submit" className="k-button mt-7">成績を入力する</Link>
         </div>
       </main>
@@ -89,37 +89,37 @@ export function MyPage() {
   }
 
   if (state === "error" || !profile) {
-    return <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6"><div className="rounded-2xl border-2 border-black bg-[#ff7768]/25 p-5 font-bold">{message || "データを表示できませんでした。"}</div></main>;
+    return <main className="mx-auto max-w-5xl px-4 py-14 sm:px-6"><div className="rounded-2xl border border-black/20 bg-neutral-100 p-5 font-bold">{message || "データを表示できませんでした。"}</div></main>;
   }
 
   const displayLabel = profile.identity_mode === "named" && profile.display_name ? profile.display_name : profile.pseudonym;
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">
-      <div className="mb-8">
+    <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6 sm:py-16">
+      <div className="mb-10 border-b border-black/15 pb-8">
         <p className="k-label">My page</p>
-        <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">{displayLabel}</h1>
+        <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-6xl">{displayLabel}</h1>
       </div>
 
-      <section className="grid gap-5 sm:grid-cols-3">
-        <Metric label="GPA" value={gpa ? Number(gpa.gpa).toFixed(2) : "—"} note={profile.gpa_visibility === "public" ? "Public" : "Private"} accent="bg-[#ffd84d]" />
-        <Metric label="表示名" value={profile.identity_mode === "named" ? "Name" : "Anonymous"} note={profile.display_name ?? profile.pseudonym} accent="bg-[#8fe0c0]" />
-        <Metric label="入力単位" value={gpa ? String(gpa.graded_credits) : "0"} note="graded credits" accent="bg-[#ff7768]/65" />
+      <section className="grid gap-3 sm:grid-cols-3">
+        <Metric label="GPA" value={gpa ? Number(gpa.gpa).toFixed(2) : "—"} note={profile.gpa_visibility === "public" ? "Public" : "Private"} dark />
+        <Metric label="表示名" value={profile.identity_mode === "named" ? "Name" : "Anonymous"} note={profile.display_name ?? profile.pseudonym} />
+        <Metric label="入力単位" value={gpa ? String(gpa.graded_credits) : "0"} note="graded credits" />
       </section>
 
       <section className="mt-7 k-card overflow-hidden">
-        <div className="border-b-2 border-black bg-[#2864ff] p-6 text-white">
-          <p className="text-[11px] font-black uppercase tracking-[0.16em] text-white/65">Saved grades</p>
-          <h2 className="mt-1 text-2xl font-black">保存済みの成績</h2>
+        <div className="border-b border-black/10 bg-black p-6 text-white">
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-white/45">Saved grades</p>
+          <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">保存済みの成績</h2>
         </div>
-        <div className="divide-y-2 divide-black">
+        <div className="divide-y divide-black/10">
           {grades.filter((grade) => grade.score != null).map((grade) => {
             const subject = SUBJECTS.find((item) => item.id === grade.subject_id);
             return (
               <div key={grade.subject_id} className="grid grid-cols-[minmax(0,1fr)_80px_90px] items-center gap-3 bg-white px-6 py-4">
-                <span className="font-black">{subject?.name ?? grade.subject_id}</span>
-                <span className="text-right font-mono font-black">{grade.score == null ? "—" : Number(grade.score).toFixed(0)}</span>
-                <span className="flex items-center justify-end gap-1.5 text-xs font-black text-black/50">
+                <span className="font-bold">{subject?.name ?? grade.subject_id}</span>
+                <span className="text-right font-mono font-bold">{grade.score == null ? "—" : Number(grade.score).toFixed(0)}</span>
+                <span className="flex items-center justify-end gap-1.5 text-xs font-bold text-black/45">
                   {grade.visibility === "public" ? <Eye size={14} /> : <EyeOff size={14} />}
                   {grade.visibility === "public" ? "Public" : "Private"}
                 </span>
@@ -136,12 +136,12 @@ export function MyPage() {
   );
 }
 
-function Metric({ label, value, note, accent }: { label: string; value: string; note: string; accent: string }) {
+function Metric({ label, value, note, dark = false }: { label: string; value: string; note: string; dark?: boolean }) {
   return (
-    <div className={`k-card p-5 ${accent}`}>
-      <p className="k-label">{label}</p>
+    <div className={`rounded-2xl border border-black/15 p-5 ${dark ? "bg-black text-white" : "bg-white"}`}>
+      <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${dark ? "text-white/45" : "text-black/40"}`}>{label}</p>
       <p className="mt-2 break-words text-2xl font-black tracking-tight">{value}</p>
-      <p className="mt-1 truncate text-xs font-bold text-black/50">{note}</p>
+      <p className={`mt-1 truncate text-xs font-medium ${dark ? "text-white/45" : "text-black/40"}`}>{note}</p>
     </div>
   );
 }

@@ -20,24 +20,24 @@ export function PrivacyControls({
   onGpaVisibilityChange: (visibility: Visibility) => void;
 }) {
   return (
-    <section className="k-card p-6">
+    <section className="k-card p-6 sm:p-7">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="k-label">Visibility</p>
-          <h2 className="mt-1 text-2xl font-black">公開設定</h2>
+          <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">公開設定</h2>
         </div>
-        <div className="grid size-11 place-items-center rounded-full border-2 border-black bg-[#2864ff] text-white">
-          {gpaVisibility === "public" ? <Eye size={20} /> : <EyeOff size={20} />}
+        <div className="grid size-10 place-items-center rounded-full border border-black/15">
+          {gpaVisibility === "public" ? <Eye size={18} /> : <EyeOff size={18} />}
         </div>
       </div>
 
-      <div className="mt-5 grid grid-cols-2 gap-2 rounded-2xl border-2 border-black bg-[#f5f1e8] p-1.5">
+      <div className="mt-6 grid grid-cols-2 gap-1 rounded-full bg-neutral-100 p-1">
         {(["named", "anonymous"] as const).map((mode) => (
           <button
             key={mode}
             type="button"
             onClick={() => onIdentityModeChange(mode)}
-            className={`rounded-xl px-3 py-2.5 text-sm font-black transition ${identityMode === mode ? "border-2 border-black bg-white shadow-[2px_2px_0_#111]" : "border-2 border-transparent text-black/45"}`}
+            className={`rounded-full px-3 py-2.5 text-sm font-bold transition ${identityMode === mode ? "bg-black text-white" : "text-black/45 hover:text-black"}`}
           >
             {mode === "anonymous" ? "Anonymous" : "Name"}
           </button>
@@ -57,10 +57,10 @@ export function PrivacyControls({
         </label>
       )}
 
-      <div className="mt-5 flex items-center justify-between gap-4 rounded-2xl border-2 border-black bg-[#f8f7f2] p-4">
+      <div className="mt-5 flex items-center justify-between gap-4 border-t border-black/10 pt-5">
         <div>
-          <p className="font-black">GPAを公開</p>
-          <p className="mt-1 text-xs font-bold text-black/45">OFFの場合、順位だけ表示します</p>
+          <p className="font-bold">GPAを公開</p>
+          <p className="mt-1 text-xs font-medium text-black/40">OFFの場合、順位だけ表示します</p>
         </div>
         <Toggle
           checked={gpaVisibility === "public"}

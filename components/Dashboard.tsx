@@ -99,23 +99,23 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
+    <main className="mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+      <div className="mb-10 flex flex-wrap items-end justify-between gap-5 border-b border-black/15 pb-8">
         <div>
           <p className="k-label">Grade entry</p>
-          <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">成績を登録</h1>
-          <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-black/55">
+          <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-6xl">成績を登録</h1>
+          <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-black/50">
             点数を入力するとGPAを自動計算します。公開設定は名前・GPA・各科目ごとに変更できます。
           </p>
         </div>
-        <div className="rounded-full border-2 border-black bg-[#8fe0c0] px-4 py-2 text-xs font-black">
+        <div className="rounded-full border border-black/20 px-4 py-2 text-xs font-bold text-black/60">
           2026 / 4年
         </div>
       </div>
 
       <section className="mb-7 grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <div className="k-card p-6 sm:p-8">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-3">
             <Metric label="GPA" value={gpa == null ? "—" : gpa.toFixed(2)} note={`${credits} credits`} accent />
             <Metric label="参加者内順位" value={mine ? `#${mine.rank} / ${mine.participantCount}` : "—"} note="保存後に表示" />
             <Metric label="上位率" value={mine ? `${mine.topPercent.toFixed(1)}%` : "—"} note="参加者内" />
@@ -159,8 +159,8 @@ export default function Dashboard() {
         <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
             <p className="k-label">Save</p>
-            <h2 className="mt-1 text-2xl font-black">ランキングに反映</h2>
-            <p className="mt-2 text-sm font-medium text-black/50">保存後も同じブラウザから何度でも更新できます。</p>
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">ランキングに反映</h2>
+            <p className="mt-2 text-sm font-medium text-black/45">保存後も同じブラウザから何度でも更新できます。</p>
           </div>
           <button type="button" onClick={submit} disabled={submitState === "saving"} className="k-button min-w-56 gap-2">
             {submitState === "saving" ? "保存中…" : "保存する"}
@@ -168,7 +168,7 @@ export default function Dashboard() {
           </button>
         </div>
         {message && (
-          <div className={`border-t-2 border-black px-6 py-4 text-sm font-bold sm:px-8 ${submitState === "error" ? "bg-[#ff7768]/20" : "bg-[#8fe0c0]/35"}`} aria-live="polite">
+          <div className={`border-t border-black/10 px-6 py-4 text-sm font-bold sm:px-8 ${submitState === "error" ? "bg-neutral-100" : "bg-neutral-50"}`} aria-live="polite">
             <span className="inline-flex items-center gap-2">
               {submitState === "saved" && <CheckCircle2 size={17} />}
               {message}
@@ -187,10 +187,10 @@ export default function Dashboard() {
 
 function Metric({ label, value, note, accent = false }: { label: string; value: string; note: string; accent?: boolean }) {
   return (
-    <div className={`rounded-3xl border-2 border-black p-5 ${accent ? "bg-[#ffd84d]" : "bg-[#f8f7f2]"}`}>
-      <p className="k-label">{label}</p>
+    <div className={`rounded-2xl border border-black/15 p-5 ${accent ? "bg-black text-white" : "bg-white"}`}>
+      <p className={`text-[11px] font-bold uppercase tracking-[0.14em] ${accent ? "text-white/45" : "text-black/40"}`}>{label}</p>
       <p className="mt-2 font-mono text-3xl font-black tracking-tight">{value}</p>
-      <p className="mt-1 text-xs font-bold text-black/45">{note}</p>
+      <p className={`mt-1 text-xs font-bold ${accent ? "text-white/45" : "text-black/40"}`}>{note}</p>
     </div>
   );
 }
