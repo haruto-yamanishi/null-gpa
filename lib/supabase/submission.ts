@@ -1,0 +1,115 @@
+import type {
+  GradeInput,
+  IdentityMode,
+  RankingRow,
+  SubjectStatistic,
+  Visibility,
+} from "@/lib/types";
+import { getSupabaseBrowserClient } from "./client";
+
+export type SubmissionPayload = {
+  identityMode: IdentityMode;
+  displayName: string;
+  gpaVisibility: Visibility;
+  grades: GradeInput[];
+};
+
+async function ensureSession() {
+  const supabase = getSupabaseBrowserClient();
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  if (sessionError) throw sessionError;
+
+  if (sessionData.session?.user) {
+    return { supabase, user: sessionData.session.user };
+  }
+
+  const { data, error } = await supabase.auth.signInAnonymously();
+  if (error) throw error;
+  if (!data.user) throw new Error("Anonymous sign-in did not return a user.");
+
+  return { supabase, user: data.user };
+}
+
+export async function saveSubmission(payload: SubmissionPayload) {
+  const { supabase, user } = await ensureSession();
+  const displayName = payload.identityMode === "named" ? payload.displayName.trim() : null;
+
+  const { error: profileError } = await supabase.from("profiles").upsert({
+    user_id: user.id,
+    identity_mode: payload.identityMode,
+    display_name: displayName || null,
+    gpa_visibility: payload.gpaVisibility,
+    updated_at: new Date().toISOString(),
+  });
+  if (profileError) throw profileError;
+
+  const gradeRows = payload.grades.map((grade) => ({
+    user_id: user.id,
+    subject_id: grade.subjectId,
+    score: grade.score,
+    visibility: grade.visibility,
+    updated_at: new Date().toISOString(),
+  }));
+
+  const { error: gradesError } = await supabase.from("grade_submissions").upsert(gradeRows, {
+    onConflict: "user_id,subject_id",
+  });
+  if (gradesError) throw gradesError;
+
+  const { error: refreshError } = await supabase.rpc("refresh_my_gpa");
+  if (refreshError) throw refreshError;
+
+  const [board, statistics] = await Promise.all([
+    fetchLeaderboard(),
+    fetchSubjectStatistics(payload.grades.filter((grade) => grade.score != null).map((grade) => grade.subjectId)),
+  ]);
+
+  return { board, statistics };
+}
+
+export async function fetchLeaderboard(): Promise<RankingRow[]> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.rpc("get_gpa_leaderboard");
+  if (error) throw error;
+
+  return (data ?? []).map((row: Record<string, unknown>) => ({
+    rank: Number(row.rank),
+    participantCount: Number(row.participant_count),
+    topPercent: Number(row.top_percent),
+    pseudonym: String(row.pseudonym),
+    displayName: row.display_name == null ? null : String(row.display_name),
+    gpa: row.gpa == null ? null : Number(row.gpa),
+    isMe: Boolean(row.is_me),
+  }));
+}
+
+export async function fetchSubjectStatistics(subjectIds: string[]) {
+  const supabase = getSupabaseBrowserClient();
+  const entries = await Promise.all(
+    subjectIds.map(async (subjectId) => {
+      const { data, error } = await supabase.rpc("get_subject_statistics", {
+        p_subject_id: subjectId,
+      });
+      if (error) throw error;
+
+      const row = data?.[0] as Record<string, unknown> | undefined;
+      if (!row) return null;
+
+      const statistic: SubjectStatistic = {
+        subjectId,
+        score: row.score == null ? null : Number(row.score),
+        rank: row.rank == null ? null : Number(row.rank),
+        participantCount: Number(row.participant_count ?? 0),
+        average: row.average == null ? null : Number(row.average),
+        median: row.median == null ? null : Number(row.median),
+        deviation: row.deviation == null ? null : Number(row.deviation),
+      };
+
+      return statistic;
+    }),
+  );
+
+  return Object.fromEntries(
+    entries.filter((entry): entry is SubjectStatistic => entry != null).map((entry) => [entry.subjectId, entry]),
+  );
+}
