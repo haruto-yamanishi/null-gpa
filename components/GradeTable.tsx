@@ -37,7 +37,7 @@ export function GradeTable({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                   <p className="font-bold">{subject.name}</p>
-                  <p className="text-xs font-medium text-black/35">{subject.credits} credits</p>
+                  <p className="text-xs font-medium text-black/35">{subject.credits}単位</p>
                 </div>
                 {stat ? (
                   <p className="mt-1 text-xs font-medium text-black/40">
