@@ -45,6 +45,8 @@ export const SYNTHETIC_PARTICIPANTS: Participant[] = baseScores.map((scores, ind
   displayName: index % 7 === 0 ? `Student ${index + 1}` : null,
   identityMode: index % 7 === 0 ? "named" : "anonymous",
   gpaVisibility: index % 5 === 0 ? "public" : "private",
+  seatNumber: 401 + index,
+  seatNumberVisibility: index % 6 === 0 ? "public" : "private",
   grades: Object.fromEntries(
     SUBJECTS.map((subject, subjectIndex) => [
       subject.id,
