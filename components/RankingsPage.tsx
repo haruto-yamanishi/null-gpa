@@ -155,6 +155,7 @@ export function RankingsPage() {
           <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-6xl">ランキング</h1>
           <p className="mt-4 max-w-2xl text-sm font-medium leading-6 text-black/50">
             ランキングは成績を登録した参加者だけ見られます。再訪時は出席番号と、登録済み科目からランダムに1科目の点数で簡易確認します。
+            一度確認すると、同じブラウザでは12時間入力を省略できます。
           </p>
         </div>
 
