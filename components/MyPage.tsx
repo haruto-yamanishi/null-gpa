@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Crown, Eye, EyeOff, Medal, Sparkles } from "lucide-react";
 import { SUBJECTS } from "@/lib/fixtures";
+import { letterGrade } from "@/lib/grading";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { fetchMyGpaRank, fetchSubjectStatistics } from "@/lib/supabase/submission";
 import { subjectDeviationDisplay } from "@/lib/subject-statistics";
@@ -132,12 +133,20 @@ export function MyPage() {
             const subject = SUBJECTS.find((item) => item.id === grade.subject_id);
             const statistic = subjectStatistics[grade.subject_id];
             const deviation = subjectDeviationDisplay(statistic);
+            const gradeLetter = grade.score == null ? null : letterGrade(Number(grade.score));
             const podium = statistic?.rank ? getPodiumTheme(statistic.rank) : null;
             return (
               <div key={grade.subject_id} className={`flex flex-wrap items-center gap-x-5 gap-y-2 px-6 py-4 ${podium?.row ?? "bg-white"}`}>
                 <span className="min-w-0 basis-full font-bold sm:flex-1 sm:basis-auto">{subject?.name ?? grade.subject_id}</span>
-                <div className="flex min-w-[190px] items-baseline justify-between gap-5 sm:w-[230px]">
-                  <span className="font-mono text-lg font-black">{grade.score == null ? "—" : `${Number(grade.score).toFixed(0)}点`}</span>
+                <div className="flex min-w-[220px] items-center justify-between gap-5 sm:w-[260px]">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-lg font-black">{grade.score == null ? "—" : `${Number(grade.score).toFixed(0)}点`}</span>
+                    {gradeLetter && (
+                      <span className="grid size-8 place-items-center rounded-full border border-black/20 bg-white font-mono text-sm font-black" aria-label={`評定 ${gradeLetter}`}>
+                        {gradeLetter}
+                      </span>
+                    )}
+                  </div>
                   {statistic?.rank
                     ? <RankDisplay rank={statistic.rank} total={statistic.participantCount} />
                     : <span className="font-mono text-xs font-bold text-black/50">—</span>}
