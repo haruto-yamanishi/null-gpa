@@ -26,18 +26,18 @@ export function PrivacyControls({
           <p className="k-label">Visibility</p>
           <h2 className="mt-2 text-2xl font-black tracking-[-0.025em]">公開設定</h2>
         </div>
-        <div className="grid size-10 place-items-center rounded-full border border-black/15">
+        <div className="grid size-10 place-items-center rounded-[4px] border border-black/15">
           {gpaVisibility === "public" ? <Eye size={18} /> : <EyeOff size={18} />}
         </div>
       </div>
 
-      <div className="mt-6 grid grid-cols-2 gap-1 rounded-full bg-neutral-100 p-1">
+      <div className="mt-6 grid grid-cols-2 gap-1 rounded-[6px] bg-neutral-100 p-1">
         {(["named", "anonymous"] as const).map((mode) => (
           <button
             key={mode}
             type="button"
             onClick={() => onIdentityModeChange(mode)}
-            className={`rounded-full px-3 py-2.5 text-sm font-bold transition ${identityMode === mode ? "bg-black text-white" : "text-black/45 hover:text-black"}`}
+            className={`rounded-[4px] px-3 py-2.5 text-sm font-bold transition ${identityMode === mode ? "bg-black text-white" : "text-black/45 hover:text-black"}`}
           >
             {mode === "anonymous" ? "Anonymous" : "Name"}
           </button>
