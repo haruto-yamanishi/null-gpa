@@ -1,13 +1,14 @@
 export type AdmissionBenefit = {
   university: string;
   program: string;
-  maxRank: number;
+  maxRank?: number;
   threshold: string;
   schoolYears: string;
   benefit: string;
   note?: string;
   sourceUrl: string;
   kind: "scholarship" | "recommendation";
+  label?: string;
 };
 
 export const ADMISSION_BENEFITS: AdmissionBenefit[] = [
@@ -21,6 +22,40 @@ export const ADMISSION_BENEFITS: AdmissionBenefit[] = [
     note: "スーパーVOSは3・4年とも上位5%など、さらに条件があります。",
     sourceUrl: "https://www.nagaokaut.ac.jp/admissions/actions/specially-treat/index.html",
     kind: "scholarship",
+    label: "特待候補",
+  },
+  {
+    university: "日本学生支援機構（JASSO）",
+    program: "給付奨学金（返済不要）",
+    threshold: "家計・学力等の要件",
+    schoolYears: "編入学後に申込",
+    benefit: "要件を満たせば、編入学後に在学採用へ申し込める返済不要の給付奨学金。",
+    note: "編入前の支援期間を含む支給期間は、通算72か月が上限です。大学の奨学金窓口で手続きします。",
+    sourceUrl: "https://www.jasso.go.jp/shogakukin/about/kyufu/shikaku/zaigaku.html",
+    kind: "scholarship",
+    label: "奨学金",
+  },
+  {
+    university: "日本学生支援機構（JASSO）",
+    program: "貸与奨学金（第一種・第二種）",
+    threshold: "家計・学力等の要件",
+    schoolYears: "編入学後3か月以内に手続き",
+    benefit: "第一種（無利子）は編入先で新規申込み、第二種（有利子）は所定の手続きで卒業予定期まで継続できる場合があります。",
+    note: "編入前から貸与中の場合も、編入先の担当窓口へ早めに相談してください。",
+    sourceUrl: "https://www.jasso.go.jp/shogakukin/saiyochu/todokede/tengaku.html",
+    kind: "scholarship",
+    label: "奨学金",
+  },
+  {
+    university: "電気通信大学",
+    program: "学域地方出身学生支援奨学金",
+    threshold: "地方出身・成績優秀・経済的支援が必要",
+    schoolYears: "2028年度以降の3年次編入",
+    benefit: "返還不要・年額6万円（対象期間1年間）。",
+    note: "情報理工学域昼間コース対象。広報活動等への協力意欲も要件で、申請書類と学業成績等に基づき選考されます。",
+    sourceUrl: "https://www.uec.ac.jp/campus/fee/scholarship_ruralareas.html",
+    kind: "scholarship",
+    label: "奨学金",
   },
   {
     university: "九州大学",
@@ -158,12 +193,12 @@ export const ADMISSION_BENEFITS: AdmissionBenefit[] = [
 
 export function getAdmissionBenefits(rank: number) {
   if (!Number.isInteger(rank) || rank < 1) return [];
-  return ADMISSION_BENEFITS.filter((benefit) => rank <= benefit.maxRank);
+  return ADMISSION_BENEFITS.filter((benefit) => benefit.maxRank === undefined || rank <= benefit.maxRank);
 }
 
 export function getNextAdmissionTarget(rank: number) {
   if (!Number.isInteger(rank) || rank < 1) return null;
   return [...ADMISSION_BENEFITS]
-    .sort((a, b) => b.maxRank - a.maxRank)
-    .find((benefit) => rank > benefit.maxRank) ?? null;
+    .filter((benefit) => benefit.maxRank !== undefined && rank > benefit.maxRank)
+    .sort((a, b) => (b.maxRank ?? 0) - (a.maxRank ?? 0))[0] ?? null;
 }

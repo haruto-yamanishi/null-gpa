@@ -11,8 +11,14 @@ describe("admission benefits", () => {
 
   it("filters out programs whose rank threshold is not met", () => {
     const benefits = getAdmissionBenefits(9);
-    expect(benefits.every((benefit) => benefit.maxRank >= 9)).toBe(true);
+    expect(benefits.filter((benefit) => benefit.maxRank !== undefined).every((benefit) => benefit.maxRank! >= 9)).toBe(true);
     expect(benefits.some((benefit) => benefit.maxRank === 2)).toBe(false);
+  });
+
+  it("includes scholarships that do not use a rank threshold", () => {
+    const programs = getAdmissionBenefits(40).map((benefit) => benefit.program);
+    expect(programs).toContain("給付奨学金（返済不要）");
+    expect(programs).toContain("貸与奨学金（第一種・第二種）");
   });
 
   it("finds the closest stricter target", () => {
