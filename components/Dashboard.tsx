@@ -116,7 +116,7 @@ export default function Dashboard() {
       <section className="mb-7 grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
         <div className="k-card p-6 sm:p-8">
           <div className="grid gap-3 sm:grid-cols-3">
-            <Metric label="GPA" value={gpa == null ? "—" : gpa.toFixed(2)} note={`${credits} credits`} accent />
+            <Metric label="GPA" value={gpa == null ? "—" : gpa.toFixed(2)} note={`${credits}単位`} accent />
             <Metric label="参加者内順位" value={mine ? `#${mine.rank} / ${mine.participantCount}` : "—"} note="保存後に表示" />
             <Metric label="上位率" value={mine ? `${mine.topPercent.toFixed(1)}%` : "—"} note="参加者内" />
           </div>
