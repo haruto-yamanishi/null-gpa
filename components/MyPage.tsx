@@ -104,7 +104,7 @@ export function MyPage() {
       <section className="grid gap-3 sm:grid-cols-3">
         <Metric label="GPA" value={gpa ? Number(gpa.gpa).toFixed(2) : "—"} note={profile.gpa_visibility === "public" ? "Public" : "Private"} dark />
         <Metric label="表示名" value={profile.identity_mode === "named" ? "Name" : "Anonymous"} note={profile.display_name ?? profile.pseudonym} />
-        <Metric label="入力単位" value={gpa ? String(gpa.graded_credits) : "0"} note="graded credits" />
+        <Metric label="入力単位" value={gpa ? String(gpa.graded_credits) : "0"} note="単位" />
       </section>
 
       <section className="mt-7 k-card overflow-hidden">
