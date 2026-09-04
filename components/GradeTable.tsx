@@ -1,19 +1,20 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { SUBJECTS, SYNTHETIC_PARTICIPANTS } from "@/lib/fixtures";
-import { subjectAnalytics } from "@/lib/leaderboard";
-import type { Visibility } from "@/lib/types";
+import { SUBJECTS } from "@/lib/fixtures";
+import type { SubjectStatistic, Visibility } from "@/lib/types";
 import { Toggle } from "./Toggle";
 
 export function GradeTable({
   scores,
   visibilities,
+  analytics,
   onScoreChange,
   onVisibilityChange,
 }: {
   scores: Record<string, number | null>;
   visibilities: Record<string, Visibility>;
+  analytics: Record<string, SubjectStatistic>;
   onScoreChange: (subjectId: string, score: number | null) => void;
   onVisibilityChange: (subjectId: string, visibility: Visibility) => void;
 }) {
@@ -27,9 +28,7 @@ export function GradeTable({
       <div className="divide-y divide-white/10">
         {SUBJECTS.map((subject) => {
           const score = scores[subject.id];
-          const analytics = typeof score === "number"
-            ? subjectAnalytics(subject.id, SYNTHETIC_PARTICIPANTS, score)
-            : null;
+          const stat = analytics[subject.id];
           const visibility = visibilities[subject.id] ?? "private";
 
           return (
@@ -39,10 +38,13 @@ export function GradeTable({
                   <p className="font-bold">{subject.name}</p>
                   <p className="text-xs text-zinc-500">{subject.credits} credits</p>
                 </div>
-                {analytics && (
+                {stat ? (
                   <p className="mt-1 text-xs text-zinc-500">
-                    #{analytics.rank} / {analytics.n} participants · 偏差値 {analytics.deviation?.toFixed(1) ?? "—"}
+                    {stat.rank ? `#${stat.rank} / ${stat.participantCount} participants` : "順位 —"}
+                    {stat.deviation == null ? " · 偏差値は10人以上で表示" : ` · 偏差値 ${stat.deviation.toFixed(1)}`}
                   </p>
+                ) : (
+                  <p className="mt-1 text-xs text-zinc-600">保存後に参加者内順位・偏差値を表示</p>
                 )}
               </div>
 
