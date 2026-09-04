@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
-import { Database, LockKeyhole, UserRound } from "lucide-react";
+import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { SUBJECTS } from "@/lib/fixtures";
 import { calculateGpa } from "@/lib/grading";
 import { saveSubmission } from "@/lib/supabase/submission";
@@ -9,32 +10,28 @@ import type {
   GradeInput,
   IdentityMode,
   RankingRow,
-  SubjectRankingRow,
   SubjectStatistic,
   Visibility,
 } from "@/lib/types";
 import { GradeTable } from "./GradeTable";
 import { PrivacyControls } from "./PrivacyControls";
-import { RankingBoard } from "./RankingBoard";
-import { SubjectBoards } from "./SubjectBoards";
 
 const initialScores: Record<string, number | null> = Object.fromEntries(
   SUBJECTS.map((subject) => [subject.id, null]),
 );
 
 const initialVisibilities: Record<string, Visibility> = Object.fromEntries(
-  SUBJECTS.map((subject) => [subject.id, "private"]),
+  SUBJECTS.map((subject) => [subject.id, "public"]),
 );
 
 export default function Dashboard() {
-  const [identityMode, setIdentityMode] = useState<IdentityMode>("anonymous");
+  const [identityMode, setIdentityMode] = useState<IdentityMode>("named");
   const [displayName, setDisplayName] = useState("");
-  const [gpaVisibility, setGpaVisibility] = useState<Visibility>("private");
+  const [gpaVisibility, setGpaVisibility] = useState<Visibility>("public");
   const [scores, setScores] = useState(initialScores);
   const [visibilities, setVisibilities] = useState(initialVisibilities);
   const [board, setBoard] = useState<RankingRow[]>([]);
   const [subjectStats, setSubjectStats] = useState<Record<string, SubjectStatistic>>({});
-  const [subjectBoards, setSubjectBoards] = useState<Record<string, SubjectRankingRow[]>>({});
   const [submitState, setSubmitState] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
 
@@ -46,7 +43,7 @@ export default function Dashboard() {
     () => SUBJECTS.map((subject) => ({
       subjectId: subject.id,
       score: scores[subject.id] ?? null,
-      visibility: visibilities[subject.id] ?? "private",
+      visibility: visibilities[subject.id] ?? "public",
     })),
     [scores, visibilities],
   );
@@ -55,7 +52,7 @@ export default function Dashboard() {
   const mine = board.find((entry) => entry.isMe);
 
   function clearStaleMessage() {
-    if (submitState === "error") {
+    if (submitState !== "idle" && submitState !== "saving") {
       setSubmitState("idle");
       setMessage("");
     }
@@ -64,13 +61,13 @@ export default function Dashboard() {
   async function submit() {
     if (!backendConfigured) {
       setSubmitState("error");
-      setMessage("Supabase環境変数が未設定です。");
+      setMessage("接続設定が見つかりません。時間をおいて再読み込みしてください。");
       return;
     }
 
     if (identityMode === "named" && !displayName.trim()) {
       setSubmitState("error");
-      setMessage("Namedを選ぶ場合は表示名を入力してください。");
+      setMessage("名前を入力してください。匿名で参加する場合はAnonymousを選べます。");
       return;
     }
 
@@ -81,7 +78,7 @@ export default function Dashboard() {
     }
 
     setSubmitState("saving");
-    setMessage("匿名セッションを作成して保存しています…");
+    setMessage("保存しています…");
 
     try {
       const result = await saveSubmission({
@@ -92,9 +89,8 @@ export default function Dashboard() {
       });
       setBoard(result.board);
       setSubjectStats(result.statistics);
-      setSubjectBoards(result.subjectBoards);
       setSubmitState("saved");
-      setMessage("保存しました。ランキングと科目統計を更新しました。");
+      setMessage("保存しました。ランキングに反映されています。");
     } catch (error) {
       console.error(error);
       setSubmitState("error");
@@ -103,22 +99,24 @@ export default function Dashboard() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12">
-      <section className="mb-8 grid gap-4 lg:grid-cols-[1.25fr_.75fr]">
-        <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <p className="font-mono text-xs font-bold tracking-[.2em] text-lime-200">2026 / GRADE 4 / SELF-REPORTED</p>
-              <h1 className="mt-2 text-3xl font-black tracking-tight sm:text-5xl">成績は入力する。<br />公開するかは自分で決める。</h1>
-            </div>
-            <div className={`flex items-center gap-2 rounded-full border px-3 py-2 text-xs font-bold ${backendConfigured ? "border-lime-200/20 bg-lime-200/10 text-lime-100" : "border-amber-300/20 bg-amber-300/10 text-amber-100"}`}>
-              {backendConfigured ? <Database size={14} /> : <LockKeyhole size={14} />}
-              {backendConfigured ? "SUPABASE READY" : "LOCAL ONLY"}
-            </div>
-          </div>
+    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
+        <div>
+          <p className="k-label">Grade entry</p>
+          <h1 className="mt-2 text-4xl font-black tracking-[-0.04em] sm:text-5xl">成績を登録</h1>
+          <p className="mt-3 max-w-2xl text-sm font-medium leading-6 text-black/55">
+            点数を入力するとGPAを自動計算します。公開設定は名前・GPA・各科目ごとに変更できます。
+          </p>
+        </div>
+        <div className="rounded-full border-2 border-black bg-[#8fe0c0] px-4 py-2 text-xs font-black">
+          2026 / 4年
+        </div>
+      </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
-            <Metric label="GPA" value={gpa == null ? "—" : gpa.toFixed(2)} note={`${credits} graded credits`} accent />
+      <section className="mb-7 grid gap-5 lg:grid-cols-[1.2fr_.8fr]">
+        <div className="k-card p-6 sm:p-8">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <Metric label="GPA" value={gpa == null ? "—" : gpa.toFixed(2)} note={`${credits} credits`} accent />
             <Metric label="参加者内順位" value={mine ? `#${mine.rank} / ${mine.participantCount}` : "—"} note="保存後に表示" />
             <Metric label="上位率" value={mine ? `${mine.topPercent.toFixed(1)}%` : "—"} note="参加者内" />
           </div>
@@ -143,58 +141,45 @@ export default function Dashboard() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.25fr_.75fr]">
-        <GradeTable
-          scores={scores}
-          visibilities={visibilities}
-          analytics={subjectStats}
-          onScoreChange={(subjectId, score) => {
-            clearStaleMessage();
-            setScores((current) => ({ ...current, [subjectId]: score }));
-          }}
-          onVisibilityChange={(subjectId, visibility) => {
-            clearStaleMessage();
-            setVisibilities((current) => ({ ...current, [subjectId]: visibility }));
-          }}
-        />
+      <GradeTable
+        scores={scores}
+        visibilities={visibilities}
+        analytics={subjectStats}
+        onScoreChange={(subjectId, score) => {
+          clearStaleMessage();
+          setScores((current) => ({ ...current, [subjectId]: score }));
+        }}
+        onVisibilityChange={(subjectId, visibility) => {
+          clearStaleMessage();
+          setVisibilities((current) => ({ ...current, [subjectId]: visibility }));
+        }}
+      />
 
-        <div className="space-y-6">
-          <section className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-            <p className="text-xs font-bold tracking-[.14em] text-zinc-500">SUBMIT</p>
-            <h2 className="mt-1 text-xl font-black">ランキングに参加</h2>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">
-              初回はSupabase Anonymous Authで端末用アカウントを作成します。学校公式順位ではなく、参加者内順位です。
-            </p>
-            <button
-              type="button"
-              onClick={submit}
-              disabled={submitState === "saving"}
-              className="mt-4 min-h-12 w-full rounded-xl bg-lime-200 px-4 py-3 font-black text-black disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {submitState === "saving" ? "保存中…" : "ランキングに参加 / 更新"}
-            </button>
-            {message && (
-              <p className={`mt-3 text-sm ${submitState === "error" ? "text-rose-300" : "text-zinc-400"}`} aria-live="polite">
-                {message}
-              </p>
-            )}
-          </section>
-
-          <RankingBoard board={board} />
-          <SubjectBoards boards={subjectBoards} />
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-            <div className="flex items-start gap-3">
-              <UserRound className="mt-0.5 text-zinc-400" />
-              <div>
-                <p className="font-bold">今日公開するMVPの境界</p>
-                <p className="mt-1 text-sm leading-6 text-zinc-500">
-                  他ユーザーはRLSによりあなたの生点数を直接取得できません。Privateの科目点数は数値非公開ですが、順位はランキング機能として表示されます。一方、無料構成ではSupabaseプロジェクト管理者はtrust boundary内です。製作者にも絶対に見えない、とは表示しません。
-                </p>
-              </div>
-            </div>
+      <section className="mt-7 k-card overflow-hidden">
+        <div className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div>
+            <p className="k-label">Save</p>
+            <h2 className="mt-1 text-2xl font-black">ランキングに反映</h2>
+            <p className="mt-2 text-sm font-medium text-black/50">保存後も同じブラウザから何度でも更新できます。</p>
           </div>
+          <button type="button" onClick={submit} disabled={submitState === "saving"} className="k-button min-w-56 gap-2">
+            {submitState === "saving" ? "保存中…" : "保存する"}
+            {submitState !== "saving" && <ArrowRight size={18} />}
+          </button>
         </div>
+        {message && (
+          <div className={`border-t-2 border-black px-6 py-4 text-sm font-bold sm:px-8 ${submitState === "error" ? "bg-[#ff7768]/20" : "bg-[#8fe0c0]/35"}`} aria-live="polite">
+            <span className="inline-flex items-center gap-2">
+              {submitState === "saved" && <CheckCircle2 size={17} />}
+              {message}
+            </span>
+            {submitState === "saved" && (
+              <Link href="/rankings" className="ml-4 inline-flex items-center gap-1 underline underline-offset-4">
+                ランキングを見る <ArrowRight size={14} />
+              </Link>
+            )}
+          </div>
+        )}
       </section>
     </main>
   );
@@ -202,10 +187,10 @@ export default function Dashboard() {
 
 function Metric({ label, value, note, accent = false }: { label: string; value: string; note: string; accent?: boolean }) {
   return (
-    <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-      <p className="text-xs font-bold tracking-[.14em] text-zinc-500">{label}</p>
-      <p className={`mt-2 font-mono text-3xl font-black ${accent ? "text-lime-200" : ""}`}>{value}</p>
-      <p className="mt-1 text-xs text-zinc-500">{note}</p>
+    <div className={`rounded-3xl border-2 border-black p-5 ${accent ? "bg-[#ffd84d]" : "bg-[#f8f7f2]"}`}>
+      <p className="k-label">{label}</p>
+      <p className="mt-2 font-mono text-3xl font-black tracking-tight">{value}</p>
+      <p className="mt-1 text-xs font-bold text-black/45">{note}</p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (value: boolean) => void; label: string }) {
+export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (checked: boolean) => void; label: string }) {
   return (
     <button
       type="button"
@@ -8,9 +8,11 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
       aria-checked={checked}
       aria-label={label}
       onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-7 w-12 shrink-0 items-center rounded-full border transition ${checked ? "border-lime-300/60 bg-lime-300/20" : "border-white/15 bg-white/5"}`}
+      className={`relative h-8 w-14 shrink-0 rounded-full border-2 border-black transition ${checked ? "bg-[#2864ff]" : "bg-[#d9d6cc]"}`}
     >
-      <span className={`h-5 w-5 rounded-full transition ${checked ? "translate-x-6 bg-lime-200" : "translate-x-1 bg-zinc-500"}`} />
+      <span
+        className={`absolute top-1/2 size-5 -translate-y-1/2 rounded-full border-2 border-black bg-white transition ${checked ? "left-7" : "left-1"}`}
+      />
     </button>
   );
 }

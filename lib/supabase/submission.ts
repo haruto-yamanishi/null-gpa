@@ -16,7 +16,7 @@ export type SubmissionPayload = {
   grades: GradeInput[];
 };
 
-async function ensureSession() {
+export async function ensureSession() {
   const supabase = getSupabaseBrowserClient();
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
   if (sessionError) throw sessionError;
@@ -68,6 +68,15 @@ export async function saveSubmission(payload: SubmissionPayload) {
   ]);
 
   return { board, statistics, subjectBoards };
+}
+
+export async function loadRankings() {
+  await ensureSession();
+  const [board, subjectBoards] = await Promise.all([
+    fetchLeaderboard(),
+    fetchSubjectLeaderboards(SUBJECTS.map((subject) => subject.id)),
+  ]);
+  return { board, subjectBoards };
 }
 
 export async function fetchLeaderboard(): Promise<RankingRow[]> {

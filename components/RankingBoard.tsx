@@ -4,34 +4,29 @@ import type { RankingRow } from "@/lib/types";
 
 export function RankingBoard({ board }: { board: RankingRow[] }) {
   return (
-    <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035]">
-      <div className="border-b border-white/10 p-5">
-        <p className="text-xs font-bold tracking-[.14em] text-zinc-500">LIVE BOARD</p>
-        <h2 className="mt-1 text-xl font-black">GPAランキング</h2>
-        <p className="mt-1 text-xs text-zinc-500">参加者内順位。学校公式順位ではありません。</p>
+    <section className="k-card overflow-hidden">
+      <div className="border-b-2 border-black bg-[#ffd84d] p-6">
+        <p className="k-label">GPA ranking</p>
+        <h2 className="mt-1 text-3xl font-black tracking-tight">GPAランキング</h2>
+        <p className="mt-2 text-xs font-bold text-black/50">参加者内順位</p>
       </div>
 
       {board.length === 0 ? (
-        <div className="p-6 text-sm text-zinc-500">
-          まだランキングデータがありません。成績を入力して「ランキングに参加 / 更新」を押すと反映されます。
-        </div>
+        <div className="p-7 text-sm font-bold text-black/45">まだランキングデータがありません。</div>
       ) : (
-        <div>
+        <div className="divide-y-2 divide-black">
           {board.slice(0, 50).map((entry) => {
-            const label = entry.displayName
-              ? `${entry.displayName}${entry.isMe ? " · YOU" : ""}`
-              : entry.isMe
-                ? `YOU · ${entry.pseudonym}`
-                : entry.pseudonym;
+            const baseLabel = entry.displayName || entry.pseudonym;
+            const label = entry.isMe ? `${baseLabel} · YOU` : baseLabel;
 
             return (
               <div
                 key={`${entry.rank}-${entry.pseudonym}`}
-                className={`grid grid-cols-[48px_minmax(0,1fr)_80px] items-center gap-2 border-b border-white/5 px-5 py-3 last:border-0 ${entry.isMe ? "bg-lime-200/10" : ""}`}
+                className={`grid grid-cols-[52px_minmax(0,1fr)_88px] items-center gap-2 px-6 py-4 ${entry.isMe ? "bg-[#8fe0c0]/45" : "bg-white"}`}
               >
-                <span className="font-mono text-sm font-black">#{entry.rank}</span>
-                <span className="truncate text-sm font-bold">{label}</span>
-                <span className="text-right font-mono text-sm text-zinc-400">
+                <span className="font-mono text-base font-black">#{entry.rank}</span>
+                <span className="truncate text-sm font-black">{label}</span>
+                <span className="text-right font-mono text-sm font-black text-black/55">
                   {entry.gpa == null ? "hidden" : entry.gpa.toFixed(2)}
                 </span>
               </div>

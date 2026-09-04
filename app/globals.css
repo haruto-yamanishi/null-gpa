@@ -3,24 +3,59 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
-  --bg: #090a0c;
-  --text: #f4f5f7;
+  color-scheme: light;
+  --paper: #f5f1e8;
+  --ink: #111111;
+  --blue: #2864ff;
+  --yellow: #ffd84d;
+  --mint: #8fe0c0;
+  --coral: #ff7768;
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
+html {
+  min-height: 100%;
+  background: var(--paper);
+}
+
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--text);
   min-height: 100%;
+  background:
+    radial-gradient(circle at 92% 8%, rgba(255, 216, 77, 0.42) 0 84px, transparent 85px),
+    radial-gradient(circle at 5% 42%, rgba(143, 224, 192, 0.3) 0 110px, transparent 111px),
+    var(--paper);
+  color: var(--ink);
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
+}
+
+::selection {
+  background: var(--blue);
+  color: white;
+}
+
+@layer components {
+  .k-card {
+    @apply rounded-[28px] border-2 border-black bg-white shadow-[5px_5px_0_#111];
+  }
+
+  .k-label {
+    @apply text-[11px] font-black uppercase tracking-[0.16em] text-black/45;
+  }
+
+  .k-input {
+    @apply w-full rounded-2xl border-2 border-black bg-white px-4 py-3 text-black outline-none transition focus:-translate-y-0.5 focus:shadow-[3px_3px_0_#2864ff];
+  }
+
+  .k-button {
+    @apply inline-flex min-h-12 items-center justify-center rounded-full border-2 border-black bg-[#2864ff] px-5 py-3 font-black text-white shadow-[3px_3px_0_#111] transition hover:-translate-y-0.5 hover:shadow-[4px_5px_0_#111] disabled:cursor-not-allowed disabled:opacity-50;
+  }
 }
