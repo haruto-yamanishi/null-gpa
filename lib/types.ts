@@ -19,6 +19,8 @@ export type Participant = {
   displayName: string | null;
   identityMode: IdentityMode;
   gpaVisibility: Visibility;
+  seatNumber: number;
+  seatNumberVisibility: Visibility;
   grades: Record<string, { score: number; visibility: Visibility }>;
 };
 
@@ -28,6 +30,7 @@ export type RankingRow = {
   topPercent: number;
   pseudonym: string;
   displayName: string | null;
+  seatNumber: number | null;
   gpa: number | null;
   isMe: boolean;
 };
@@ -48,6 +51,7 @@ export type SubjectRankingRow = {
   participantCount: number;
   pseudonym: string;
   displayName: string | null;
+  seatNumber: number | null;
   score: number | null;
   isMe: boolean;
 };
