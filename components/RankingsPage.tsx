@@ -250,7 +250,7 @@ export function RankingsPage() {
         <div>
           <p className="k-label">Rankings</p>
           <h1 className="mt-3 text-4xl font-black tracking-[-0.045em] sm:text-6xl">ランキング</h1>
-          <p className="mt-4 text-sm font-medium text-black/50">GPAと科目ごとの参加者内順位を表示します。</p>
+          <p className="mt-4 text-sm font-medium text-black/50">GPAと科目ごとの順位を表示します。</p>
         </div>
         <button type="button" onClick={() => void refresh()} disabled={state === "loading"} className="k-button-secondary gap-2 px-4 py-2.5 text-sm disabled:opacity-40">
           <RefreshCw size={16} className={state === "loading" ? "animate-spin" : ""} />

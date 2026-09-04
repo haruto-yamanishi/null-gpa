@@ -11,7 +11,7 @@ const cards = [
   {
     href: "/rankings",
     title: "ランキングを見る",
-    text: "参加者内のGPA順位、科目別順位、偏差値を確認できます。",
+    text: "GPA順位、科目別順位、偏差値を確認できます。",
     icon: ChartNoAxesColumnIncreasing,
   },
   {
@@ -43,7 +43,7 @@ export default function HomePage() {
           </h1>
 
           <p className="mt-8 max-w-2xl text-sm font-medium leading-7 text-black/55 sm:text-base">
-            神山まるごと高専4年生向け。成績を入力すると、GPA・参加者内順位・科目順位・偏差値を確認できます。
+            神山まるごと高専4年生向け。成績を入力すると、GPA・総合順位・科目順位・偏差値を確認できます。
           </p>
 
           <div className="mt-9 flex flex-wrap gap-3">

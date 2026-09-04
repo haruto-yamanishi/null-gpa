@@ -1,5 +1,6 @@
 import type {
   GradeInput,
+  GpaRank,
   IdentityMode,
   RankingRow,
   SubjectRankingRow,
@@ -190,6 +191,37 @@ export async function fetchLeaderboard(): Promise<RankingRow[]> {
     gpa: row.gpa == null ? null : Number(row.gpa),
     isMe: Boolean(row.is_me),
   }));
+}
+
+export async function fetchMyGpaRank(): Promise<GpaRank | null> {
+  const supabase = getSupabaseBrowserClient();
+  const { data, error } = await supabase.rpc("get_my_gpa_rank");
+  if (error) {
+    // Temporary fallback while migration 005 is being applied in production.
+    if (isMissingRpcError(error)) {
+      try {
+        const mine = (await fetchLeaderboard()).find((entry) => entry.isMe);
+        return mine ? {
+          rank: mine.rank,
+          participantCount: mine.participantCount,
+          topPercent: mine.topPercent,
+        } : null;
+      } catch (fallbackError) {
+        if (fallbackError instanceof Error && fallbackError.message === RANKING_ACCESS_REQUIRED) return null;
+        throw fallbackError;
+      }
+    }
+    throw normalizeSupabaseError(error);
+  }
+
+  const row = data?.[0] as Record<string, unknown> | undefined;
+  if (!row) return null;
+
+  return {
+    rank: Number(row.rank),
+    participantCount: Number(row.participant_count),
+    topPercent: Number(row.top_percent),
+  };
 }
 
 export async function fetchSubjectStatistics(subjectIds: string[]) {

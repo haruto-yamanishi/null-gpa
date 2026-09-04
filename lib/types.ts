@@ -35,6 +35,12 @@ export type RankingRow = {
   isMe: boolean;
 };
 
+export type GpaRank = {
+  rank: number;
+  participantCount: number;
+  topPercent: number;
+};
+
 export type SubjectStatistic = {
   subjectId: string;
   score: number | null;

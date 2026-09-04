@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { SUBJECTS } from "@/lib/fixtures";
 import type { SubjectRankingRow } from "@/lib/types";
+import { getPodiumTheme, RankDisplay } from "./RankDisplay";
 
 export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankingRow[]> }) {
   const availableSubjectIds = useMemo(
@@ -39,15 +40,16 @@ export function SubjectBoards({ boards }: { boards: Record<string, SubjectRankin
       ) : (
         <div className="divide-y divide-black/10">
           {rows.slice(0, 50).map((entry) => {
+            const podium = getPodiumTheme(entry.rank);
             const baseLabel = entry.displayName || entry.pseudonym;
             const seatLabel = entry.seatNumber == null ? "" : `No.${entry.seatNumber} · `;
             const label = `${seatLabel}${baseLabel}${entry.isMe ? " · YOU" : ""}`;
             return (
               <div
                 key={`${effectiveSubjectId}-${entry.rank}-${entry.pseudonym}`}
-                className={`grid grid-cols-[52px_minmax(0,1fr)_88px] items-center gap-2 px-6 py-4 ${entry.isMe ? "bg-neutral-100" : "bg-white"}`}
+                className={`grid grid-cols-[88px_minmax(0,1fr)_88px] items-center gap-2 px-6 py-4 ${podium?.row ?? (entry.isMe ? "bg-neutral-100" : "bg-white")}`}
               >
-                <span className="font-mono text-base font-black">#{entry.rank}</span>
+                <RankDisplay rank={entry.rank} />
                 <span className="truncate text-sm font-bold">{label}</span>
                 <span className="text-right font-mono text-sm font-bold text-black/45">
                   {entry.score == null ? "hidden" : entry.score.toFixed(0)}
